@@ -5,5 +5,5 @@
 class AppConfig {
   // ─── Sua chave da API do Groq ────────────────────────────────────────────────
   // Obtenha em: https://console.groq.com/keys
-  static const String defaultApiKey = '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';
+  static const String defaultApiKey = 'gsk...';
 }
