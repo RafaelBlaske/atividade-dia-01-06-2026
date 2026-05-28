@@ -26,10 +26,9 @@ flutter run
 2. Faça login (gratuito)
 3. Clique em **API Keys** → **Create API Key**
 4. Copie a chave (começa com `gsk_...`)
-5. No app, toque em **⚙️ Configurações**
-6. Cole a chave no campo **API Key** e salve
+5. No arquivo app_config.dart coloque a chave API
+6. Rode o app
 
-A chave fica salva localmente no dispositivo via `SharedPreferences`.
 
 ---
 
