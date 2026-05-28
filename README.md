@@ -29,7 +29,7 @@ Aplicativo de chat com inteligência artificial desenvolvido em **Flutter**, int
 1. Acesse [console.groq.com](https://console.groq.com) e faça login (gratuito)
 2. Vá em **API Keys** → **Create API Key**
 3. Copie a chave gerada — ela começa com `gsk_...`
-4. Cole a chave no arquivo `lib/create/app_config.dart`:
+4. Cole a chave no arquivo `lib/config/app_config.dart`:
 
 ```dart
 class AppConfig {
