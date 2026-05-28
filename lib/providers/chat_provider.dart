@@ -4,6 +4,7 @@ import '../models/message_model.dart';
 import '../models/conversation_model.dart';
 import '../services/groq_service.dart';
 import '../services/history_service.dart';
+import '../config/app_config.dart'; // ← chave padrão embutida
 
 class ChatProvider extends ChangeNotifier {
   final GroqService _groqService;
@@ -15,7 +16,8 @@ class ChatProvider extends ChangeNotifier {
   List<Message> _messages = [];
   bool _isTyping = false;
   String _errorMessage = '';
-  String _apiKey = '';
+  // Usa a chave embutida como valor inicial — nunca fica vazia
+  String _apiKey = AppConfig.defaultApiKey;
   String _selectedModel = GroqModel.available[0].id;
   double _temperature = 0.7;
 
@@ -39,7 +41,15 @@ class ChatProvider extends ChangeNotifier {
   // ─── Carregar preferências salvas ────────────────────────────────────────────
   Future<void> loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    _apiKey = prefs.getString('groq_api_key') ?? '';
+
+    // Se o usuário salvou uma chave personalizada, usa ela.
+    // Caso contrário, mantém a chave padrão embutida no AppConfig.
+    final saved = prefs.getString('groq_api_key');
+    if (saved != null && saved.trim().isNotEmpty) {
+      _apiKey = saved.trim();
+    }
+    // Se não há nada salvo, _apiKey já está com AppConfig.defaultApiKey
+
     _selectedModel = prefs.getString('groq_model') ?? GroqModel.available[0].id;
     _temperature = prefs.getDouble('groq_temperature') ?? 0.7;
     notifyListeners();
@@ -121,7 +131,6 @@ class ChatProvider extends ChangeNotifier {
 
   // ─── Iniciar nova conversa ───────────────────────────────────────────────────
   Future<void> startNewChat() async {
-    // A conversa atual já está salva via auto-save; apenas reinicia
     _messages = [];
     _errorMessage = '';
     _currentConversationId = _newId();
@@ -134,7 +143,6 @@ class ChatProvider extends ChangeNotifier {
     _messages = List.from(conv.messages);
     _currentConversationId = conv.id;
     _conversationStartedAt = conv.createdAt;
-    // Restaura o modelo usado nessa conversa (se ainda disponível)
     final modelExists =
         GroqModel.available.any((m) => m.id == conv.modelId);
     if (modelExists) _selectedModel = conv.modelId;
@@ -142,15 +150,15 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Remover API key ─────────────────────────────────────────────────────────
+  // ─── Remover API key (volta para a chave padrão embutida) ────────────────────
   Future<void> clearApiKey() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('groq_api_key');
-    _apiKey = '';
+    _apiKey = AppConfig.defaultApiKey; // ← volta para o padrão embutido
     notifyListeners();
   }
 
-  // ─── Limpar mensagens (sem histórico — só limpa a tela) ──────────────────────
+  // ─── Limpar mensagens ────────────────────────────────────────────────────────
   void clearMessages() {
     _messages = [];
     _errorMessage = '';
